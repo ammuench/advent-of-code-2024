@@ -72,7 +72,6 @@ func part2() {
 	for _, row := range dataList {
 		skipFirstCheck := false
 		rowErroneousValues := 0
-		firstRowIssueIdx := -1
 		rowInitialDirection := Asc
 
 		firstDiff := (row[0] - row[1])
@@ -80,7 +79,6 @@ func part2() {
 
 		if firstDiff == 0 {
 			rowErroneousValues++
-			firstRowIssueIdx = 0
 			// Skip doing all the checks on the first number, we know it's bad already
 			skipFirstCheck = true
 			secondDiff = (row[1] - row[2])
@@ -100,6 +98,7 @@ func part2() {
 			}
 
 			if (numIdx + 1) == len(row) {
+				fmt.Println(row)
 				safeReportsWithDampenerCount++
 			} else {
 				nextNum := row[numIdx+1]
@@ -110,32 +109,31 @@ func part2() {
 				sequenceChangeDirectionIsInvalid := diffWithNext > 0 && rowInitialDirection == Asc || diffWithNext < 0 && rowInitialDirection == Desc
 
 				if sequenceChangeValueIsInvalid || sequenceChangeDirectionIsInvalid {
-					// If the previous number is where the problem started, we try removing the current number and 
-					// seeing if things play nice for the rest of the run  so that the current bad number doesn't
-					// get double-counted
-					if (numIdx != 0 && firstRowIssueIdx == numIdx-1) {
-						endSkipDiff := row[numIdx-1] - row[numIdx+1]
-
-						endSkipSequenceChangeValueIsInvalid := endSkipDiff == 0 || IntAbs(endSkipDiff) > 3
-						endSkipSequenceChangeDirectionIsInvalid := endSkipDiff > 0 && rowInitialDirection == Asc || endSkipDiff < 0 && rowInitialDirection == Desc
-
-						if endSkipSequenceChangeValueIsInvalid || endSkipSequenceChangeDirectionIsInvalid {
-							rowErroneousValues++
+					if numIdx == len(row)-2 {
+						if rowErroneousValues == 0 {
+							// If only error occurs on second to last number of the set, we know we can drop the last and it will be good
+							continue
 						} else {
-							fmt.Printf("DoubleChecked Row Passed! %v\n", row)
+							break
 						}
-
 					} else {
+						// If we triggered a failure, see if skipping and trying the next option fixes it.  If it doesn't we know the set is bad
+						skipDiff := num - row[numIdx+2]
+						skipSequenceChangeValueIsInvalid := skipDiff == 0 || IntAbs(skipDiff) > 3
+						skipSequenceChangeDirectionIsInvalid := skipDiff > 0 && rowInitialDirection == Asc || skipDiff < 0 && rowInitialDirection == Desc
 
-						rowErroneousValues++
+						if skipSequenceChangeValueIsInvalid || skipSequenceChangeDirectionIsInvalid {
+							break
+						} else {
+							rowErroneousValues++
+						}
 					}
+
 				}
 
 				// If we have more than one erroneous number, its invalid
 				if rowErroneousValues > 1 {
 					break
-				} else if (rowErroneousValues == 1 && firstRowIssueIdx == -1) {
-					firstRowIssueIdx = numIdx
 				}
 			}
 		}
@@ -154,7 +152,7 @@ func IntAbs(someint int) int {
 }
 
 func parseInputData() [][]int {
-	file, err := os.Open("./input2.txt")
+	file, err := os.Open("./input.txt")
 
 	if err != nil {
 		log.Fatal(err)
