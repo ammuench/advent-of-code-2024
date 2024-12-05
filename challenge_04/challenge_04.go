@@ -9,14 +9,71 @@ import (
 )
 
 var sourceData = parseInputData()
-var xWestBoundary = 2
-var yNorthBoundary = 2
-var xEastBoundary = len(sourceData[0]) - 3
-var ySouthBoundary = len(sourceData) - 3
+var xWestBoundaryPart1 = 2
+var yNorthBoundaryPart1 = 2
+var xEastBoundaryPart1 = len(sourceData[0]) - 3
+var ySouthBoundaryPart1 = len(sourceData) - 3
+var xWestBoundaryPart2 = 0
+var yNorthBoundaryPart2 = 0
+var xEastBoundaryPart2 = len(sourceData[0]) - 1
+var ySouthBoundaryPart2 = len(sourceData) - 1
 
 func main() {
 	part1()
 	part2()
+}
+
+func part2() {
+	totalMatches := 0
+	for xIdx, row := range sourceData {
+		for yIdx, char := range row {
+			if char == "A" {
+				crossMasMatches := checkMasDiagonals(xIdx, yIdx)
+				totalMatches += crossMasMatches
+			}
+		}
+	}
+
+	fmt.Printf("Part Two total matches ==%v\n", totalMatches)
+}
+
+func checkMasDiagonals(x, y int) int {
+	diagonalMatches := 0
+
+	if x > xWestBoundaryPart2 && x < xEastBoundaryPart2 && y < ySouthBoundaryPart2 && y > yNorthBoundaryPart2 {
+		nsMatch := hasMasNSMatch(x, y)
+		snMatch := hasMasSNMatch(x, y)
+
+		if nsMatch && snMatch {
+			diagonalMatches++
+		}
+	}
+
+	return diagonalMatches
+}
+
+func hasMasNSMatch(x, y int) bool {
+	if sourceData[x-1][y-1] == "M" && sourceData[x+1][y+1] == "S" {
+		return true
+	}
+
+	if sourceData[x-1][y-1] == "S" && sourceData[x+1][y+1] == "M" {
+		return true
+	}
+
+	return false
+}
+
+func hasMasSNMatch(x, y int) bool {
+	if sourceData[x-1][y+1] == "M" && sourceData[x+1][y-1] == "S" {
+		return true
+	}
+
+	if sourceData[x-1][y+1] == "S" && sourceData[x+1][y-1] == "M" {
+		return true
+	}
+
+	return false
 }
 
 func part1() {
@@ -41,24 +98,21 @@ func part1() {
 
 }
 
-func part2() {
-}
-
 func checkCardinals(x, y int) int {
 	cardinalMatches := 0
 
-	if x > xWestBoundary && hasWestMatch(x, y) {
+	if x > xWestBoundaryPart1 && hasWestMatch(x, y) {
 		cardinalMatches++
 	}
-	if y > yNorthBoundary && hasNorthMatch(x, y) {
-		cardinalMatches++
-	}
-
-	if x < xEastBoundary && hasEastMatch(x, y) {
+	if y > yNorthBoundaryPart1 && hasNorthMatch(x, y) {
 		cardinalMatches++
 	}
 
-	if y < ySouthBoundary && hasSouthMatch(x, y) {
+	if x < xEastBoundaryPart1 && hasEastMatch(x, y) {
+		cardinalMatches++
+	}
+
+	if y < ySouthBoundaryPart1 && hasSouthMatch(x, y) {
 		cardinalMatches++
 	}
 
@@ -97,21 +151,21 @@ func hasWestMatch(x, y int) bool {
 func checkDiagonals(x, y int) int {
 	diagonalMatches := 0
 
-	if x > xWestBoundary {
-		if y > yNorthBoundary && hasDiagonalNWMatch(x, y) {
+	if x > xWestBoundaryPart1 {
+		if y > yNorthBoundaryPart1 && hasDiagonalNWMatch(x, y) {
 			diagonalMatches++
 		}
 
-		if y < ySouthBoundary && hasDiagonalSWMatch(x, y) {
+		if y < ySouthBoundaryPart1 && hasDiagonalSWMatch(x, y) {
 			diagonalMatches++
 		}
 	}
 
-	if x < xEastBoundary {
-		if y < ySouthBoundary && hasDiagonalSEMatch(x, y) {
+	if x < xEastBoundaryPart1 {
+		if y < ySouthBoundaryPart1 && hasDiagonalSEMatch(x, y) {
 			diagonalMatches++
 		}
-		if y > yNorthBoundary && hasDiagonalNEMatch(x, y) {
+		if y > yNorthBoundaryPart1 && hasDiagonalNEMatch(x, y) {
 			diagonalMatches++
 		}
 	}
